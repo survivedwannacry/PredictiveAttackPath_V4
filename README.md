@@ -233,7 +233,28 @@ PredictiveAttackPath/
 ├── CONTRIBUTING.md
 └── SECURITY.md
 ```
+## Demo Screenshots
 
+### Raw log input
+![Raw Logs of Multi-staged attack](docs/screenshots/Raw%20Logs%20of%20Multi-staged%20attack.png)
+
+### Detected techniques
+![Detected Techniques](docs/screenshots/Detected%20Techniques.png)
+
+### YARA / Sigma matches
+![Yara-Sigma Matches](docs/screenshots/Yara-Sigma%20Matches.png)
+
+### Predicted next steps
+![Predicted next steps](docs/screenshots/Predicted%20next%20steps.png)
+
+### Kill chain
+![Kill Chain](docs/screenshots/Kill%20Chain.png)
+
+### Attacker attribution
+![Attacker attribution](docs/screenshots/Attacker%20attribution.png)
+
+### CTI and recommendations
+![CTI and recommendations](docs/screenshots/CTI%20and%20recommendations.png)
 ## Troubleshooting
 
 **"Python not found"** → Set `python_cmd` in settings to your Python 3.10+ path.
