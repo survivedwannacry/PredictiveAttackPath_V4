@@ -1,0 +1,9 @@
+{
+    "engine_url": "http://127.0.0.1:8000",
+    "health_path": "/health",
+    "python_cmd": ["py", "-3"],
+    "backend_entry": "run.py",
+    "startup_timeout_sec": 15,
+    "top_n_predictions": 10,
+    "auto_analyze_on_save": false
+}

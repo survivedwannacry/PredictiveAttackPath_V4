@@ -1,0 +1,17 @@
+[
+    {
+        "keys": ["ctrl+shift+a"],
+        "command": "predictive_attack_path_analyze",
+        "context": [{ "key": "setting.is_widget", "operand": false }]
+    },
+    {
+        "keys": ["ctrl+shift+x"],
+        "command": "predictive_attack_path_clear",
+        "context": [{ "key": "setting.is_widget", "operand": false }]
+    },
+    {
+        "keys": ["ctrl+shift+r"],
+        "command": "predictive_attack_path_show_panel",
+        "context": [{ "key": "setting.is_widget", "operand": false }]
+    }
+]

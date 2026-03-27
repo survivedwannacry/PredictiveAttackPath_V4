@@ -1,0 +1,22 @@
+[
+    {
+        "caption": "Attack Path: Analyze Current Document",
+        "command": "predictive_attack_path_analyze"
+    },
+    {
+        "caption": "Attack Path: Clear Highlights & Results",
+        "command": "predictive_attack_path_clear"
+    },
+    {
+        "caption": "Attack Path: Check Engine Health",
+        "command": "predictive_attack_path_health"
+    },
+    {
+        "caption": "Attack Path: Toggle Auto-Analyze on Save",
+        "command": "predictive_attack_path_toggle_auto_analyze"
+    },
+    {
+        "caption": "Attack Path: Show Results Panel",
+        "command": "predictive_attack_path_show_panel"
+    }
+]

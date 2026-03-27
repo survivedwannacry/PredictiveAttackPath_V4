@@ -1,0 +1,27 @@
+# PredictiveAttackPath — Python Backend Dependencies
+
+# Core API framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+
+# Graph analysis
+networkx>=3.1
+
+# HTTP client (for MITRE data download)
+requests>=2.31.0
+
+# YARA malware scanning (optional — fallback regex mode if not installed)
+yara-python>=4.3.0
+
+# Sigma rule loading (optional — only needed for custom .yml rules)
+pyyaml>=6.0
+
+# MITRE STIX/TAXII support (optional — fallback download method)
+stix2>=3.0.1
+taxii2-client>=2.3.0
+
+# Development / Testing
+httpx>=0.24.0
+pytest>=7.4.0
+pytest-asyncio>=0.21.0

@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+*.so
+venv/
+.venv/
+env/
+.env
+
+# MITRE data cache (downloaded at runtime)
+backend/data/
+
+# OS
+.DS_Store
+._*
+Thumbs.db
+__MACOSX/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+.tox/
+
+# Logs (keep test_logs/, ignore runtime logs)
+backend/server.log

