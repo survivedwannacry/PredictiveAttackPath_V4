@@ -254,7 +254,7 @@ PredictiveAttackPath/
 ![Attacker attribution](docs/screenshots/Attacker%20attribution.png)
 
 ### CTI and recommendations
-![CTI and recommendations](docs/screenshots/cti-and-recommendations.png)
+![CTI and recommendations](docs/screenshots/cti-and-recommendations.png.png)
 
 ## Troubleshooting
 
