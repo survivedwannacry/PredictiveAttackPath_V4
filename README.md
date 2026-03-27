@@ -256,6 +256,7 @@ PredictiveAttackPath/
 ### CTI and recommendations
 ![CTI and recommendations](docs/screenshots/CTI%20and%20recommendations.png)
 
+
 ## Troubleshooting
 
 **"Python not found"** → Set `python_cmd` in settings to your Python 3.10+ path.
